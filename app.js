@@ -109,9 +109,7 @@ app.post('/deploy', (req, res) => {
           console.log("🐼 Result of deployment creation:")
           console.log(req.body);
           console.log("🐼 End of Result of deployment creation")
-          console.log("🐼 deployment_info:")
-          console.log(deployment_info);
-          console.log("🐼 End of deployment_info")
+
 
           let deployment_info = {
             application_id: req.body.data.appId,
@@ -120,6 +118,10 @@ app.post('/deploy', (req, res) => {
             ref: req.body.data.commit,
             status: "pending"
           };
+
+          console.log("🐼 deployment_info:")
+          console.log(deployment_info);
+          console.log("🐼 End of deployment_info")
 
           deployments.push(deployment_info)
 
