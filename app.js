@@ -179,7 +179,7 @@ app.post('/deploy', (req, res) => {
         console.log("😀 DEPLOYMENT_SUCCESS", req.body)
 
 
-        let github_deployment_id = deployments.find(item => item.ref == ref);
+        let github_deployment_id = deployments.find(item => item.ref == ref).github_deployment_id;
         // TODO check if OK
         console.log("😀 github_deployment_id", github_deployment_id)
 
@@ -192,9 +192,12 @@ app.post('/deploy', (req, res) => {
         })
         .then(results => {
           res.status(201);
+          console.log("😜 ", results)
+
           res.send(results);
         })
         .catch(error => {
+          console.log("😡 ", error)
           res.status(500).send(error);
         })
 
