@@ -11,7 +11,7 @@ POC of webapp to change deployment status on GitHub
   {
     appId: 'app_74a5e4ed-76c8-4b92-adf2-a2f3e73f7e61',
     id: 24,
-    uuid: 'deployment_36ea9a2b-1101-4cfe-ab53-219e6bc6f4a6',
+    uuid: 'deployment_36ea9a2b-1101-4cfe-ab53-219e6bc6f4a6', // and when ? DEPLOYMENT_SUCCESS
     commit: '46c1075d72252d647c718784c3c94d6b1b8417b2',
     cause: 'github',
     state: 'WIP',
