@@ -1,2 +1,6 @@
 node_modules
 .DS_Store*
+go.js
+*.log
+create-deployment.js
+update-status.js
