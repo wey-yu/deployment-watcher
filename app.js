@@ -95,9 +95,14 @@ app.post('/deploy', (req, res) => {
       if(req.body.data.cause=="github") {
 
         console.log("🐼 DEPLOYMENT_ACTION_BEGIN")
+        let commit_id = req.body.data.commit;
+        console.log("commit_id:", commit_id);
+        console.log("req.body:", req.body);
+
+
 
         githubCli.postData({path: `/repos/${owner}/${repository}/deployments`, data:{
-            ref: req.body.data.commit
+            ref: commit_id
           , auto_merge: false
           , description: "Deploying my branch"
           , required_contexts: [
@@ -107,7 +112,7 @@ app.post('/deploy', (req, res) => {
         .then(results => {
           //let deployment_id = results.id;
           console.log("🐼 Result of deployment creation:")
-          console.log(req.body);
+          console.log("results:", results);
           console.log("🐼 End of Result of deployment creation")
 
 
