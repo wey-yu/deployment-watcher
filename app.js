@@ -93,6 +93,9 @@ app.post('/deploy', (req, res) => {
       // on check     data.cause: 'github',
       // que se passe-t-il si plusieurs déploiements?
       if(req.body.data.cause=="github") {
+
+        console.log("🐼 DEPLOYMENT_ACTION_BEGIN")
+
         githubCli.postData({path: `/repos/${owner}/${repository}/deployments`, data:{
             ref: req.body.data.commit
           , auto_merge: false
@@ -103,21 +106,29 @@ app.post('/deploy', (req, res) => {
         }})
         .then(results => {
           //let deployment_id = results.id;
-
+          console.log("🐼 Result of deployment creation:")
           console.log(req.body);
+          console.log("🐼 End of Result of deployment creation")
+          console.log("🐼 deployment_info:")
+          console.log(deployment_info);
+          console.log("🐼 End of deployment_info")
 
-          deployments.push({
+          let deployment_info = {
             application_id: req.body.data.appId,
             github_deployment_id: results.id,
             clever_deployment_id: req.body.data.uuid,
             ref: req.body.data.commit,
             status: "pending"
-          })
+          };
+
+          deployments.push(deployment_info)
 
           res.status(201);
           res.send(results);
         })
         .catch(error => {
+          console.log("🐼 ... 😡")
+          console.log(error)
           res.status(500).send(error);
         });
       }
@@ -129,6 +140,9 @@ app.post('/deploy', (req, res) => {
       if(req.body.data.cause=="github") {
         let application_id = req.body.data.id;
         let ref = req.body.data.commitId;
+
+        console.log("😀 DEPLOYMENT_SUCCESS", req.body)
+
 
         let github_deployment_id = deployments.find(item => item.ref == ref);
         // TODO check if OK
