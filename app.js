@@ -87,23 +87,21 @@ app.post('/deploy', (req, res) => {
 
   switch (req.body.event) {
     case "DEPLOYMENT_ACTION_BEGIN":
-      // on a le data.commit
-      // on fait la creation
-      // on recupère l'id de deploiement
-      // on check     data.cause: 'github',
-      // que se passe-t-il si plusieurs déploiements?
+      // what to do if several deployments?
       if(req.body.data.cause=="github") {
 
         /*
-          on récupère l'id du merge donc finalement de master
-          il nous faudrait l'id ou le nom de la branche que l'on merge sur master
+          the CC notification hook get the sha commit of the merge (aka master? or production branch)
+          but, we need the sha or the name of the feature branch that we want to merge on master (or on production branch)
 
+          See: => https://developer.github.com/v3/repos/deployments/#create-a-deployment
           "At GitHub we often deploy branches and verify them before we merge a pull request."
-          => https://developer.github.com/v3/repos/deployments/#create-a-deployment
 
           https://developer.github.com/v3/repos/commits/#get-a-single-commit
           https://api.github.com/repos/wey-yu/demo/commits/ac94ef290814e04a945c6d0149f9e4039c9196a7
-          et on essaye de changer le status de tous les éléments dans:
+
+          We get the single commit with the sha of the merge
+          and we change the status of the last item of the parents list
 
           "parents": [
             {
@@ -116,9 +114,9 @@ app.post('/deploy', (req, res) => {
               "url": "https://api.github.com/repos/wey-yu/demo/commits/bcdc104511f514b4f6ad6c7dc5e7559c0fb97794",
               "html_url": "https://github.com/wey-yu/demo/commit/bcdc104511f514b4f6ad6c7dc5e7559c0fb97794"
             }
-          ],
+          ]
 
-          --> le dernier de la liste ?
+          ⚠️ I'm not sure of that ...
 
         */
 
@@ -142,7 +140,7 @@ app.post('/deploy', (req, res) => {
             let deployment_info = {
               application_id: req.body.data.appId,
               github_deployment_id: results.id,
-              clever_deployment_id: req.body.data.uuid,
+              clever_deployment_id: req.body.data.uuid, // it would be nice to get this id when `DEPLOYMENT_SUCCESS`
               ref: req.body.data.commit, // == commit_sha
               status: "pending"
             };
@@ -175,9 +173,7 @@ app.post('/deploy', (req, res) => {
       if(req.body.data.cause=="github") {
         let application_id = req.body.data.id;
         let ref = req.body.data.commitId;
-
         console.log("😀 DEPLOYMENT_SUCCESS", req.body)
-
 
         let github_deployment_id = deployments.find(item => item.ref == ref).github_deployment_id;
         // TODO check if OK
@@ -213,11 +209,8 @@ app.post('/deploy', (req, res) => {
       res.status(201);
     break;
 
-
   }
 
-  //console.log(req.body);
-  //res.status(201);
 })
 
 app.get('/hello', (req, res) => {
