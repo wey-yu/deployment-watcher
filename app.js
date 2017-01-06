@@ -99,6 +99,7 @@ app.post('/deploy', (req, res) => {
         console.log("commit_id:", commit_id);
         console.log("req.body:", req.body);
 
+        console.log("🤢 ci_context:", ci_context);
 
 
         githubCli.postData({path: `/repos/${owner}/${repository}/deployments`, data:{
