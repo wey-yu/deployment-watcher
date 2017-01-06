@@ -94,52 +94,79 @@ app.post('/deploy', (req, res) => {
       // que se passe-t-il si plusieurs déploiements?
       if(req.body.data.cause=="github") {
 
-        console.log("🐼 DEPLOYMENT_ACTION_BEGIN")
-        let commit_id = req.body.data.commit;
-        console.log("commit_id:", commit_id);
-        console.log("req.body:", req.body);
+        /*
+          on récupère l'id du merge donc finalement de master
+          il nous faudrait l'id ou le nom de la branche que l'on merge sur master
 
-        console.log("🤢 ci_context:", ci_context);
+          "At GitHub we often deploy branches and verify them before we merge a pull request."
+          => https://developer.github.com/v3/repos/deployments/#create-a-deployment
 
+          https://developer.github.com/v3/repos/commits/#get-a-single-commit
+          https://api.github.com/repos/wey-yu/demo/commits/ac94ef290814e04a945c6d0149f9e4039c9196a7
+          et on essaye de changer le status de tous les éléments dans:
 
-        githubCli.postData({path: `/repos/${owner}/${repository}/deployments`, data:{
-            ref: commit_id
-          , auto_merge: false
-          , description: "Deploying my branch"
-          , required_contexts: [
-              ci_context
-            ]
-        }})
-        .then(results => {
-          //let deployment_id = results.id;
-          console.log("🐼 Result of deployment creation:")
-          console.log("results:", results);
-          console.log("🐼 End of Result of deployment creation")
+          "parents": [
+            {
+              "sha": "65941c15d00a74ab32edce5518bc33dc6ea91fa7",
+              "url": "https://api.github.com/repos/wey-yu/demo/commits/65941c15d00a74ab32edce5518bc33dc6ea91fa7",
+              "html_url": "https://github.com/wey-yu/demo/commit/65941c15d00a74ab32edce5518bc33dc6ea91fa7"
+            },
+            {
+              "sha": "bcdc104511f514b4f6ad6c7dc5e7559c0fb97794",
+              "url": "https://api.github.com/repos/wey-yu/demo/commits/bcdc104511f514b4f6ad6c7dc5e7559c0fb97794",
+              "html_url": "https://github.com/wey-yu/demo/commit/bcdc104511f514b4f6ad6c7dc5e7559c0fb97794"
+            }
+          ],
 
+          --> le dernier de la liste ?
 
-          let deployment_info = {
-            application_id: req.body.data.appId,
-            github_deployment_id: results.id,
-            clever_deployment_id: req.body.data.uuid,
-            ref: req.body.data.commit,
-            status: "pending"
-          };
+        */
 
-          console.log("🐼 deployment_info:")
-          console.log(deployment_info);
-          console.log("🐼 End of deployment_info")
+        let commit_sha = req.body.data.commit;
 
-          deployments.push(deployment_info)
+        // get details of the commit
+        githubCli.getData({path: `/repos/${owner}/${repository}/commits/${commit_sha}`})
+        .then(commit_details => {
+          let branch_to_merge_sha = commit_details.parents.pop()["sha"];
+          // ==================================================================
+          githubCli.postData({path: `/repos/${owner}/${repository}/deployments`, data:{
+              ref: branch_to_merge_sha
+            , auto_merge: false
+            , description: "Deploying my branch"
+            , required_contexts: [
+                ci_context
+              ]
+          }})
+          .then(results => {
 
-          res.status(201);
-          res.send(results);
+            let deployment_info = {
+              application_id: req.body.data.appId,
+              github_deployment_id: results.id,
+              clever_deployment_id: req.body.data.uuid,
+              ref: req.body.data.commit, // == commit_sha
+              status: "pending"
+            };
+
+            console.log("- 🐼 branch_to_merge_sha:", branch_to_merge_sha);
+            console.log("- 🐼 deployment_info:", deployment_info);
+
+            deployments.push(deployment_info)
+
+            res.status(201);
+            res.send(results);
+          })
+          .catch(error => {
+            console.log("😡 ", error)
+            res.status(500).send(error);
+          });
+          // ==================================================================
         })
         .catch(error => {
-          console.log("🐼 ... 😡")
-          console.log(error)
+          console.log("😡 ", error)
           res.status(500).send(error);
         });
-      }
+
+      } // end if(req.body.data.cause=="github")
 
 
     break;
